@@ -29,8 +29,12 @@ export function mergeDeep<S extends any[]>(
       }
 
       for (const key in source) {
+        // never let a source key reach the prototype chain
+        if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+          continue;
+        }
         if (isObject(source[key])) {
-          if (!(key in output)) {
+          if (!Object.prototype.hasOwnProperty.call(output, key)) {
             Object.assign(output, { [key]: source[key] });
           } else {
             output[key] = mergeDeep([output[key], source[key]] as S, respectPrototype);
